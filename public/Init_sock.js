@@ -1,7 +1,8 @@
 
 var urlToConnct = '//onpaint-20005.onmodulus.net/';
 
-var socket = io.connect(urlToConnct);
+
+var socket = io();
 
 socket.on('connect', function () {
 	Android.showToast('connected  successfully');
