@@ -61,11 +61,11 @@ app.get('/admin',  function(req, res){
 });*/
 //var io = require('socket.io').listen(server);
 var io = require('socket.io')(server);
-io.set('transports', ['xhr-polling']);
+//io.set('transports', ['xhr-polling']);
 //io.configure(function () { 
 //io.set("polling duration", 30);
-io.set("heartbeat timeout", 120);
-io.set("heartbeat interval", 25);
+//io.set("heartbeat timeout", 120);
+//io.set("heartbeat interval", 25);
 //io.set("close timeout", 120);
 //});
 /*io.configure(function () { 
