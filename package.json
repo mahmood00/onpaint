@@ -1,0 +1,27 @@
+{
+  "name": "onpaint",
+  "version": "0.0.1-7",
+  "private": true,
+  "scripts": {
+    "start": "node app.js"
+  },
+  "dependencies": {
+    "express": "3.5.0",
+    "stylus": "*",
+    "socket.io": "*",
+    "fs-extra": "^0.8.1"
+  },
+  "description": "onpaint",
+  "main": "app.js",
+  "devDependencies": {},
+  "keywords": [
+    "paint",
+	"drawing"
+  ],
+  "author": "mahmood damery",
+  "license": "private",
+  "subdomain": "onpaint",
+  "engines": {
+    "node": "0.10.x"
+  }
+}
