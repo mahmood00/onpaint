@@ -16,7 +16,7 @@ var Imagina = require('imagina');
 var im = new Imagina();
 var port = process.env.PORT || 80;
 var app = express();
-var server = require('http').createServer(app);
+var server = require('http').Server(app);
 var io = require('socket.io')(server);
 server.listen(port, function () {
   console.log('Server listening at port ' + port);
@@ -78,10 +78,9 @@ app.get('/admin',  function(req, res){
 });*/
 io.on('connection', function (socket) {
   
-  socket.on('data', function (id , data) {
+  socket.on('data', function ( data) {
   	console.log(data);
-    //socket.broadcast.emit('newobj', data);
-	socket.broadcast.to(id).emit('newobj', msg);
+    socket.broadcast.emit('newobj', data);
   });
   socket.on('disconnect', function () {
 	console.log('clint disconnected');
