@@ -76,15 +76,16 @@ app.get('/admin',  function(req, res){
   io.set("transports", ["xhr-polling"]); 
   io.set("polling duration", 10); 
 });*/
+
 io.on('connection', function (socket) {
-  
-  socket.on('data', function ( data) {
-  	console.log(data);
-    socket.broadcast.emit('newobj', data);
-  });
-  socket.on('disconnect', function () {
-	console.log('clint disconnected');
-  });
+	  console.log('clint connected');
+	  socket.on('data', function ( data) {
+		console.log(data);
+		socket.broadcast.emit('newobj', data);
+	  });
+	  socket.on('disconnect', function () {
+		console.log('clint disconnected');
+	  });
   
 });
 ;
