@@ -8,20 +8,24 @@ var routes = require('./routes');
 //var http = require('http');
 var path = require('path');
 
-/// Include the node file module
+// Include the node file module
 var fs = require('fs-extra');
 
-/// Include ImageMagick
+// Include ImageMagick
 var Imagina = require('imagina');
 var im = new Imagina();
-
+var port = process.env.PORT || 80;
 var app = express();
-var server = require('http').Server(app);
+var server = require('http').createServer(app);
+var io = require('socket.io')(server);
+server.listen(port, function () {
+  console.log('Server listening at port ' + port);
+});
 // all environments
 //app.use(express.bodyParser();
 app.configure(function () {
   app.use(express.bodyParser({ keepExtensions: true}));
-  app.set('port', process.env.PORT || 80 );
+  app.set('port', port );
   app.set('views', path.join(__dirname, 'views'));
   app.set('view engine', 'jade');
   //app.use(express.favicon());
@@ -49,7 +53,7 @@ app.get('/',  function(req, res){
   res.send('<h1>Onpaint</h1>');
 });
 app.get('/admin',  function(req, res){
-  res.send(' 123456asm5');
+  res.send('pass.123456asm5Admin');
 });
 
 
@@ -60,7 +64,7 @@ app.get('/admin',  function(req, res){
   console.log('Express server listening on port ' + app.get('port'));
 });*/
 //var io = require('socket.io').listen(server);
-var io = require('socket.io')(server);
+
 //io.set('transports', ['xhr-polling']);
 //io.configure(function () { 
 //io.set("polling duration", 30);
@@ -72,14 +76,16 @@ var io = require('socket.io')(server);
   io.set("transports", ["xhr-polling"]); 
   io.set("polling duration", 10); 
 });*/
-io.sockets.on('connection', function (socket) {
+io.on('connection', function (socket) {
   
-  socket.on('data', function (data) {
+  socket.on('data', function (id , data) {
   	console.log(data);
-    socket.broadcast.emit('newobj', data);
+    //socket.broadcast.emit('newobj', data);
+	socket.broadcast.to(id).emit('newobj', msg);
+  });
+  socket.on('disconnect', function () {
+	console.log('clint disconnected');
   });
   
 });
-server.listen(app.get('port'), function(){
-  console.log('listening on *:'+app.get('port'));
-});
+;
