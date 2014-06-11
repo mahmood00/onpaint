@@ -14,8 +14,7 @@ var fs = require('fs-extra');
 // Include ImageMagick
 var Imagina = require('imagina');
 var im = new Imagina();
-//var port = process.env.PORT || 80;
-var port = 80;
+var port = process.env.PORT || 80;
 var app = express();
 var server = require('http').Server(app);
 var io = require('socket.io')(server);
