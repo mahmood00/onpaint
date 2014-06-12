@@ -28,7 +28,7 @@ function HashMap()
 
 	this.setItem = function(in_key, in_value)
 	{
-		var tmp_previous;
+		var tmp_previous=0;
 		if (typeof(in_value) != 'undefined') {
 			if (typeof(this.items[in_key]) == 'undefined') {
 				this.length++;

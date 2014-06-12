@@ -42,6 +42,7 @@
 	//canvas.freeDrawingBrush.color='red';
 	canvas.isDrawingMode = true ;
 	//DrawingOpacity = 1;
+	ids = new HashMap();//////////////////////////////////////////////////// again
 	function addIdForObject(obj){
 		obj.toObject = (function(toObject) {
 				  return function() {
@@ -53,7 +54,7 @@
 				//canvas.add(rect);
 		var d = new Date();
 		//t = Math.floor(Math.random() * (max - min + 1)) + min;
-		var t = Math.floor(Math.random() * (10 - 1 + 1)) + 1;
+		var t = Math.floor(Math.random() * (100 - 1 + 1)) + 1;
 		t = d.getTime() +''+t;
 		obj.id = t ;
 	}
@@ -68,17 +69,7 @@
 				//canvas.add(rect);
 		obj.id = id ;
 	}
-	canvas.on('object:added', function(e) {
-		if( !ids.hasItem(e.target.id))
-		{
-			if(isEraser != true)
-				e.target.opacity = DrawingOpacity;
-			addIdForObject(e.target);
-			ids.setItem(e.target.id , 1);
-			socket.emit('data', JSON.stringify(e.target) );
-			Android.showToast(' sendByAdded ' + e.target.id);
-		}
-	});
+	
 	function changeSize(size){
 		canvas.freeDrawingBrush.width=size;
 	}
@@ -98,7 +89,7 @@
 	}
 	/*function showAndroidToast(toast) {
 		var im=canvas.toDataURL({format: 'png'});
-        Android.showToast(im+" hh");
+        console.log(im+" hh");
     }*/
 	/*function toImage(){
 		var im=canvas.toDataURL({format: 'png'});
@@ -108,7 +99,7 @@
 		canvas.backgroundColor = '#FFFFFF';
 	    //var dataUrl = canvas.toDataURL({format: 'jpeg'});
 	    var dataUrl = document.getElementById('c').toDataURL("image/jpeg");
-	    //Android.showToast("after");
+	    //console.log("after");
 	    dataUrl = dataUrl.replace("data:image/png;base64,", "");
 	    dataUrl = dataUrl.replace("data:image/jpeg;base64,", "");
 	    Android.saveImage(dataUrl);
@@ -117,7 +108,7 @@
 		canvas.backgroundColor = '#FFFFFF';
 	    //var dataUrl = canvas.toDataURL({format: 'jpeg'});
 	    var dataUrl = document.getElementById('c').toDataURL("image/jpeg");
-	    //Android.showToast("after");
+	    //console.log("after");
 	    dataUrl = dataUrl.replace("data:image/png;base64,", "");
 	    dataUrl = dataUrl.replace("data:image/jpeg;base64,", "");
 	    Android.saveImageAndShare(dataUrl);
@@ -175,6 +166,7 @@
 	
 		                //sendWidthAndHeight( obj );
 		                //console.log(obj.type);
+						sendWidthAndHeight(obj);
 					    canvas.off('mouse:move');
 					    canvas.off('mouse:up');
 					    canvas.renderAll();
@@ -202,7 +194,7 @@
 			  rx:0 ,
 			  ry: 0 ,
 			  stroke: color ,
-              strokeWidth : 2 , 
+              strokeWidth : 4 , 
 			  opacity : DrawingOpacity
 			});
 			//canvas.add(myc);
@@ -220,7 +212,7 @@
 				  top: y ,
 				  fill : color,
 			 	  stroke: color ,
-              	  strokeWidth : 2
+              	  strokeWidth : 4
 				});
 
 			addIdForObject(t);
@@ -249,7 +241,7 @@
 			  height:0 ,
 			  fill : fill ,
               stroke: color ,
-              strokeWidth : 2,
+              strokeWidth : 4,
 			  opacity : DrawingOpacity
 			});
 			//var cr = new fabric.CustomRect(myc, { id : 1 });
@@ -274,7 +266,7 @@
 			  height: 0, 
 			  fill: fill, 
 			  stroke: color ,
-              strokeWidth : 2,
+              strokeWidth : 4,
 			  opacity : DrawingOpacity
 			});
 			//canvas.add(triangle);
@@ -367,29 +359,90 @@ function chaneTypeofDrawing(value){
 			startDrawing();
 		}
 }
-
-socket.on('newobj', function (data) {
-	var newobj = JSON.parse(data);
-
-	canvas.forEachObject(function(obj){
-	    	if(obj.id == newobj.id){
-	    		ids.removeItem(obj.id);
-	    		canvas.remove(obj);
-	    	}
-	     });
-    var objs = new Array();
-	objs.push(newobj);
-
-    fabric.util.enlivenObjects(objs, function(objects) {
-    	var origRenderOnAddRemove = canvas.renderOnAddRemove;
-	    canvas.renderOnAddRemove = false;
-	    
-	    var o = objects;
-		ids.setItem(newobj.id , 1);
-		addIdForObjectByInt(o[0] , newobj.id );
-		canvas.add(o[0]);
-		Android.showToast('recived'+o[0].id);
-	    canvas.renderOnAddRemove = origRenderOnAddRemove;
-	    canvas.renderAll();
+canvas.on('object:added', function(e) {
+		if( !ids.hasItem(e.target.id))
+		{
+			if(isEraser != true)
+				e.target.opacity = DrawingOpacity;
+			addIdForObject(e.target);
+			ids.setItem(e.target.id , '1');
+			socket.emit('data', {op :1 , object : JSON.stringify(e.target) } );
+			console.log(' sendByAdded ' + e.target.id);
+		}
 	});
+function sendWidthAndHeight(obj ){
+	if(obj.type == 'ellipse')
+		socket.emit('data', {op : 7 , id : obj.id , width : obj.getWidth() , height: obj.getHeight() 
+								, rx : obj.get('rx') , ry : obj.get('ry') });
+	else if(obj.type == 'line')
+		socket.emit('data', {op : 8 , id : obj.id , x2 : obj.get('x2') , y2: obj.get('y2') });
+	else
+		socket.emit('data', {op : 6 , id : obj.id , width : obj.getWidth() , height: obj.getHeight() });
+	//console.log(obj.type);
+}
+socket.on('newobj', function (data) {
+	if(data.op == 1 ){
+		var newobj = JSON.parse(data.object);
+
+		/*canvas.forEachObject(function(obj){
+				if(obj.id == newobj.id){
+					ids.removeItem(obj.id);
+					canvas.remove(obj);
+				}
+			 });*/
+		var objs = new Array();
+		objs.push(newobj);
+
+		fabric.util.enlivenObjects(objs, function(objects) {
+			//var origRenderOnAddRemove = canvas.renderOnAddRemove;
+			//canvas.renderOnAddRemove = false;
+			
+			var o = objects;
+			ids.setItem(newobj.id , '1');
+			addIdForObjectByInt(o[0] , newobj.id );
+			canvas.add(o[0]);
+			console.log('recived '+o[0].id);
+			//canvas.renderOnAddRemove = origRenderOnAddRemove;
+			canvas.renderAll();
+		});
+	}
+	else if(data.op == 6){
+		canvas.forEachObject(function(obj){
+	    	if(obj.id == data.id){
+	    		obj.setWidth(data.width);
+	            obj.setHeight(data.height);
+	            obj.setCoords();
+	            canvas.renderAll();
+	    	}
+	        //console.log(obj.id)
+	     });
+	}
+	else if(data.op == 7){
+		canvas.forEachObject(function(obj){
+	    	if(obj.id == data.id){
+	    		obj.setWidth(data.width);
+	            obj.setHeight(data.height);
+	            obj.set('rx', data.rx );
+	        	obj.set('ry', data.ry );
+	            obj.setCoords();
+	            canvas.renderAll();
+	    	}
+	        //console.log(obj.id)
+	     });
+	}
+	else if(data.op == 8){
+		canvas.forEachObject(function(obj){
+	    	if(obj.id == data.id){
+	    		obj.set({ x2: data.x2 , y2: data.y2 });
+	        	canvas.renderAll();
+	    	}
+	        //console.log(obj.id)
+	    });
+	}
   });
+  function closeEverything(){
+	socket.disconnect();
+  };
+  function connectAgain(){
+	socket.connect();
+  };

@@ -76,16 +76,57 @@ app.get('/admin',  function(req, res){
   io.set("transports", ["xhr-polling"]); 
   io.set("polling duration", 10); 
 });*/
+var rooms = {};
 
 io.on('connection', function (socket) {
 	  console.log('clint connected');
+	  socket.joined = false;
+	  
 	  socket.on('data', function ( data) {
-		console.log(data);
-		socket.broadcast.emit('newobj', data);
+		if (socket.joined == true ){
+			//socket.broadcast.emit('newobj', data);
+			socket.broadcast.to(socket.room).emit('newobj', data);
+			console.log(data);
+		}
+		else
+			console.log('not joined');
 	  });
-	  socket.on('disconnect', function () {
-		console.log('clint disconnected');
+	  
+	  socket.on('join', function(data) {
+        socket.username = data.username;
+        socket.room = data.room;
+		if (typeof(rooms[data.room]) == 'undefined') 
+			rooms[data.room] = 1;
+		else
+			rooms[data.room]+=1;
+        socket.join(data.room);
+		socket.joined = true;
+		console.log('clint join room : '+data.room);
+        //socket.broadcast.to('Lobby').emit('updatechat',' something');
+    });
+	socket.on('leave', function(data) {
+        
+		if (socket.joined == true ){	
+			if(rooms[socket.room] == 1)
+				delete rooms[socket.username];
+			else
+				rooms[socket.room]-=1;
+			socket.leave(socket.room);
+			console.log('clint disconnected and leaft room : '+socket.room);
+			socket.joined = false;
+		}
+    });
+	socket.on('disconnect', function () {
+		console.log('clint disconnected and leaft room : '+socket.room);
+		if (socket.joined == true ){	
+			if(rooms[socket.room] == 1)
+				delete rooms[socket.username];
+			else
+				rooms[socket.room]-=1;
+			socket.leave(socket.room);
+		}
+		socket.joined = false;
+			
 	  });
-  
 });
 ;
