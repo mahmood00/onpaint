@@ -93,6 +93,7 @@ io.on('connection', function (socket) {
 	  });
 	  
 	  socket.on('join', function(data) {
+		console.log('tried to conect : '+data.room);
         socket.username = data.username;
         socket.room = data.room;
 		if (typeof(rooms[data.room]) == 'undefined') 
@@ -117,14 +118,16 @@ io.on('connection', function (socket) {
 		}
     });
 	socket.on('disconnect', function () {
-		console.log('clint disconnected and leaft room : '+socket.room);
 		if (socket.joined == true ){	
 			if(rooms[socket.room] == 1)
 				delete rooms[socket.username];
 			else
 				rooms[socket.room]-=1;
 			socket.leave(socket.room);
+			console.log('clint disconnected and leaft room : '+socket.room);
 		}
+		else
+			console.log('clint disconnected without connected any room');
 		socket.joined = false;
 			
 	  });
